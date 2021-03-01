@@ -3,16 +3,19 @@ import { Router } from 'express';
 import TransactionsRepository from '../repositories/TransactionsRepository';
 import CreateTransactionService from '../services/CreateTransactionService';
 
-const transactionRepository = new TransactionsRepository();
-
 const transactionRouter = Router();
+
+const transactionsRepository = new TransactionsRepository();
 
 transactionRouter.get('/', (request, response) => {
   try {
-    const transactions = transactionRepository.all();
-    const balance = transactionRepository.getBalance();
+    const transactions = transactionsRepository.all();
 
-    return response.json({ transactions, balance });
+    // eslint-disable-next-line object-shorthand
+    return response.json({
+      transactions,
+      balance: transactionsRepository.getBalance(),
+    });
   } catch (err) {
     return response.status(400).json({ error: err.message });
   }
@@ -23,7 +26,7 @@ transactionRouter.post('/', (request, response) => {
     const { title, value, type } = request.body;
 
     const createTransaction = new CreateTransactionService(
-      transactionRepository,
+      transactionsRepository,
     );
 
     const transaction = createTransaction.execute({ title, value, type });

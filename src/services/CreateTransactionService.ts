@@ -6,6 +6,7 @@ interface Request {
   value: number;
   type: 'income' | 'outcome';
 }
+
 class CreateTransactionService {
   private transactionsRepository: TransactionsRepository;
 
@@ -14,16 +15,12 @@ class CreateTransactionService {
   }
 
   public execute({ title, value, type }: Request): Transaction {
-    const balance = this.transactionsRepository.getBalance();
+    if (type === 'outcome') {
+      const balance = this.transactionsRepository.getBalance().total;
 
-    if (type === 'outcome' && value > balance.total) {
-      throw new Error(
-        'Seu caixa está abaixo do necessário para esta transação.',
-      );
-    }
-
-    if (!['outcome', 'income'].includes(type)) {
-      throw new Error('Tipo de transação inválida.');
+      if (value > balance) {
+        throw Error('Valor de saída maior do que valor em caixa');
+      }
     }
 
     const transaction = this.transactionsRepository.create({
